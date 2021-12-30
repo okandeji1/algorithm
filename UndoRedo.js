@@ -1,65 +1,93 @@
 class UndoRedo {
-    constructor(object) {
-      this.object = object;
-      this.momento = {...this.object};
-      this.objState = null;
-    }
-  
-    set(key, value) {
-      if(!(key in this.object)){
-        return this.object = {
-            ...this.object,
-            [key]: value
-          }
-      }
-      return this.object = {
-              ...this.object,
-              [key]: value
-          }
-    }
-  
-    get(key) {
-      let objValue = '';
-      for(const [k, value] of Object.entries(this.object)){
-        if(k === key){
-          objValue = value;
-        }
-      }
-      return objValue;
-    }
-  
-    del(key) {
-      const newObj = {...this.object};
-      if(key in newObj){
-        delete newObj[key];
-      }
-      return this.object = newObj;
-    }
-  
-    undo() {
-      const objCurrentState = {...this.object};
-      if(this.object === this.momento || this.object === this.objState){
-        return 'There is no operation to undo';
-      }
-      if(!this.objState){
-        this.object = this.momento;
-        }else{
-          this.object = this.objState;
-        }
-        this.objState = objCurrentState;
-        return this.object;
-    }
-  
-    redo() {
-      const objCurrentState = {...this.object};
-      if(this.object !== this.momento || this.object === this.objState){
-        return 'There is no operation to redo';
-      }
-      this.object = this.objState;
-      this.objState = objCurrentState
-      return this.object;
-    }
+  #initialState;
+  #previousState;
+  #currentState;
+  #object;
+
+  constructor(object) {
+    this.#object = object;
+    this.#initialState = { ...this.#object };
+    this.#previousState = null;
+    this.#currentState = null;
   }
-  
-  const undoRedo = new UndoRedo({x: 4, y: 3});
-  
+
+  set(key, value) {
+    this.#previousState = { ...this.#object };
+    console.log("set initial ", this.#previousState);
+
+    // if key does not exit, add to existing object
+    if (!(key in this.#object)) {
+      this.#object = {
+        ...this.#object,
+        [key]: value,
+      };
+      console.log("set final ", this.finalState);
+      return this.#object;
+    }
+    //   Set key to new value
+    this.#object = {
+      ...this.#object,
+      [key]: value,
+    };
+    console.log("set final ", this.finalState);
+    return this.#object;
+  }
+
+  get(key) {
+    let objValue = "";
+    for (const [k, value] of Object.entries(this.#object)) {
+      if (k === key) {
+        objValue = value;
+      }
+    }
+    return objValue;
+  }
+
+  del(key) {
+    this.#previousState = { ...this.#object };
+    console.log("del initial ", this.#previousState);
+    this.#currentState = { ...this.#object };
+    if (key in this.#currentState) {
+      delete this.#currentState[key];
+      this.#object = this.#currentState;
+      console.log("del final ", this.finalState);
+      return this.#object;
+    }
+    return "This key does not exist";
+  }
+
+  undo() {
+    if (
+      this.#object === this.#initialState ||
+      this.#object === this.#previousState
+    ) {
+      return "There is no operation to undo";
+    }
+    this.#currentState = { ...this.#object };
+    this.#object = { ...this.#previousState };
+    this.#previousState = { ...this.#currentState };
+    return this.#object;
+  }
+
+  redo() {
+    if (
+      this.#object === this.#initialState ||
+      this.#object === this.#previousState
+    ) {
+      return "There is no operation to redo";
+    }
+    this.#currentState = { ...this.#object };
+    this.#object = { ...this.#previousState };
+    this.#previousState = { ...this.#currentState };
+    return this.#object;
+  }
+}
+
+const undoRedo = new UndoRedo({ x: 4, y: 3 });
+undoRedo.get("x");
+undoRedo.set("x", 1);
+undoRedo.set("y", 2);
+undoRedo.set("z", 3);
+undoRedo.del("z");
+undoRedo.undo();
+undoRedo.redo();
