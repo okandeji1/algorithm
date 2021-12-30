@@ -13,15 +13,12 @@ class UndoRedo {
 
   set(key, value) {
     this.#previousState = { ...this.#object };
-    console.log("set initial ", this.#previousState);
-
     // if key does not exit, add to existing object
     if (!(key in this.#object)) {
       this.#object = {
         ...this.#object,
         [key]: value,
       };
-      console.log("set final ", this.finalState);
       return this.#object;
     }
     //   Set key to new value
@@ -29,7 +26,6 @@ class UndoRedo {
       ...this.#object,
       [key]: value,
     };
-    console.log("set final ", this.finalState);
     return this.#object;
   }
 
@@ -45,12 +41,10 @@ class UndoRedo {
 
   del(key) {
     this.#previousState = { ...this.#object };
-    console.log("del initial ", this.#previousState);
     this.#currentState = { ...this.#object };
     if (key in this.#currentState) {
       delete this.#currentState[key];
       this.#object = this.#currentState;
-      console.log("del final ", this.finalState);
       return this.#object;
     }
     return "This key does not exist";
